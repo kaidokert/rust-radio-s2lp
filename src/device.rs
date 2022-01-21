@@ -1571,14 +1571,22 @@ impl radio::Register for McState1 {
     type Error = Infallible;
 }
 
-
-#[derive(Copy, Clone, PartialEq, Debug, BitfieldSpecifier)]
+/// Radio states (table 48)
+#[derive(Copy, Clone, PartialEq, Debug, TryFromPrimitive, IntoPrimitive, BitfieldSpecifier)]
+#[repr(u8)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[bits = 7]
-pub enum RadioState {
-
+pub enum State {
+    Shutdown = 0x7F,
+    Standby = 0x02,
+    SleepA = 0x01, // Sleep without FIFO retention
+    SleepB = 0x03, // Sleep with FIFO retention
+    Ready = 0x00,
+    Lock = 0x0C,
+    Rx = 0x30,
+    Tx = 0x5C,
+    SynthSetup = 0x50,
 }
-
 
 #[bitfield]
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -2068,21 +2076,6 @@ pub enum ExtSmpsMode {
 }
 
 pub const PM_CONF0_EXT_SMPS_REGMASK: u8 = 0x20;
-
-/// Radio states (table 48)
-#[derive(Copy, Clone, PartialEq, Debug, TryFromPrimitive, IntoPrimitive)]
-#[repr(u8)]
-pub enum State {
-    Shutdown = 0xFF,
-    Standby = 0x02,
-    SleepA = 0x01, // Sleep without FIFO retention
-    SleepB = 0x03, // Sleep with FIFO retention
-    Ready = 0x00,
-    Lock = 0x0C,
-    Rx = 0x30,
-    Tx = 0x5C,
-    SynthSetup = 0x50,
-}
 
 impl radio::RadioState for State {
     fn idle() -> Self {
