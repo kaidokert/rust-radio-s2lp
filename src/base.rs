@@ -60,7 +60,7 @@ where
     ) -> Result<(), Error<SpiErr, PinErr, DelayErr>> {
         let mut t = [Operation::Write(&cmd), Operation::Write(data)];
 
-        trace!("SPI write: {:02x?}", t);
+        trace!("SPI write: cmd {:02x} data {:02x}", cmd, data);
 
         self.cs.set_low().map_err(Error::Pin)?;
 
@@ -82,7 +82,7 @@ where
 
         let r = self.spi.exec(&mut t).map_err(Error::Spi);
 
-        trace!("SPI read: {:02x?}", t);
+        trace!("SPI read: cmd: {=[?]} {=[?]} result: {}", cmd, data, r.is_ok());
 
         self.cs.set_high().map_err(Error::Pin)?;
 
@@ -98,14 +98,14 @@ where
 
         // Wait a moment for reset
         // TODO: how long should this be?
-        let r = self.delay.delay_ms(10).map_err(Error::Delay);
+        let r = self.delay.delay_ms(500).map_err(Error::Delay);
 
         // Deassert reset (active low)
         self.rst.set_high().map_err(Error::Pin)?;
 
         // Wait a moment for init
         // TODO: how long should this be?
-        self.delay.delay_ms(10).map_err(Error::Delay)?;
+        self.delay.delay_ms(500).map_err(Error::Delay)?;
 
         r
     }

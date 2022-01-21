@@ -1571,6 +1571,15 @@ impl radio::Register for McState1 {
     type Error = Infallible;
 }
 
+
+#[derive(Copy, Clone, PartialEq, Debug, BitfieldSpecifier)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+#[bits = 7]
+pub enum RadioState {
+
+}
+
+
 #[bitfield]
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
