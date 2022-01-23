@@ -2016,11 +2016,11 @@ pub enum SMPSLevel {
 /// Clock Frequencies
 #[derive(Copy, Clone, Debug)]
 pub enum ClockFreq {
-    Clock24MHz,
-    Clock25MHz,
-    Clock26MHz,
-    Clock48MHz,
-    Clock50MHz,
+    Clock24MHz = 24_000_000,
+    Clock25MHz = 25_000_000,
+    Clock26MHz = 26_000_000,
+    Clock48MHz = 48_000_000,
+    Clock50MHz = 50_000_000,
 }
 
 /// Supported frequency bands
