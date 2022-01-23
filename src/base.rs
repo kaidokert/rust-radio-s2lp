@@ -60,7 +60,7 @@ where
     ) -> Result<(), Error<SpiErr, PinErr, DelayErr>> {
         let mut t = [Operation::Write(&cmd), Operation::Write(data)];
 
-        trace!("SPI write: cmd {:02x} data {:02x}", cmd, data);
+        //trace!("SPI write: cmd {:02x} data {:02x}", cmd, data);
 
         self.cs.set_low().map_err(Error::Pin)?;
 
@@ -82,7 +82,7 @@ where
 
         let r = self.spi.exec(&mut t).map_err(Error::Spi);
 
-        trace!("SPI read: cmd: {=[?]} {=[?]} result: {}", cmd, data, r.is_ok());
+        //trace!("SPI read: cmd: {=[?]} {=[?]} result: {}", cmd, data, r.is_ok());
 
         self.cs.set_high().map_err(Error::Pin)?;
 
