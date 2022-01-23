@@ -313,3 +313,51 @@ where
         self.hal.delay_us(us)
     }
 }
+
+/// 28-bit SYNT word and band select bit from frequency
+pub fn synt_from_freq( f_xo : u32, freq: usize, divider_enabled: bool) -> (u32, bool) {
+    let band = if freq > HIGH_BAND_LOWER_LIMIT {
+        (4,false)
+    } else {
+        (8,true)
+    };
+    let refdiv = if divider_enabled { 2 } else { 1 };
+    let synt = (((freq as u64) << 19) * (band.0 as u64) * (refdiv as u64)) / (f_xo as u64);
+    (synt as u32, band.1)
+}
+
+/// Frequency from SYNT word
+pub fn freq_from_synt( f_xo: u32, synt: u32, mid_band_selected: bool, divider_enabled: bool) -> u32 {
+    let band = if mid_band_selected { 8 } else { 4 };
+    let refdiv = if divider_enabled { 2  } else { 1 };
+    let freq = ((f_xo as u64 * synt as u64) >> 19) / band / refdiv;
+    freq as u32
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn check_freq() {
+        let fxo50 = 50_000_000;
+        let fxo24 = 24_000_000;
+        assert_eq!((0x2499999,false), synt_from_freq(fxo50, 915_000_000, false));
+        assert_eq!((0x4933333,false), synt_from_freq(fxo50, 915_000_000, true));
+        assert_eq!((0x22A3D70,true), synt_from_freq(fxo50, 433_000_000, false));
+        assert_eq!((0x4547AE1,true), synt_from_freq(fxo50, 433_000_000, true));
+        assert_eq!((0x4C40000,false), synt_from_freq(fxo24, 915_000_000, false));
+        assert_eq!((0x9055555,true), synt_from_freq(fxo24, 433_000_000, true));
+        assert_eq!((0x2A3D70A,false), synt_from_freq(fxo50, 1_056_000_000, false));
+        assert_eq!((0xAFB3333,true), synt_from_freq(fxo24, 527_100_000, true));
+    }
+    #[test]
+    fn check_synt() {
+        let fxo50 = 50_000_000;
+        let fxo24 = 24_000_000;
+        assert_eq!(914_999_985, freq_from_synt(fxo50, 0x2499999, false, false));
+        assert_eq!(915_000_009, freq_from_synt(fxo50, 0x249999A, false, false));
+        assert_eq!(433_000_001, freq_from_synt(fxo24, 0x9055556, true, true));
+    }
+
+}
