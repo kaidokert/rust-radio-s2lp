@@ -7,7 +7,7 @@ use core::fmt::Debug;
 use core::marker::PhantomData;
 
 use embedded_hal::{delay::blocking::DelayUs, spi::{Mode, Phase, Polarity}};
-use radio::{BasicChannel, Channel as _, Registers as _};
+use radio::{/*BasicChannel, Channel as _,*/ Registers as _};
 
 #[cfg(not(feature="defmt"))]
 use log::debug;
@@ -21,6 +21,8 @@ pub use base::{Base, Io};
 pub mod device;
 use device::*;
 
+pub mod config;
+use config::{HIGH_BAND_LOWER_LIMIT};
 
 /// S2lp SPI operating mode
 pub const SPI_MODE: Mode = Mode {
@@ -29,18 +31,19 @@ pub const SPI_MODE: Mode = Mode {
 };
 
 
-/// S2lp device instance
-pub struct S2lp<Hal, SpiErr: Debug, PinErr: Debug, DelayErr: Debug> {
-    hal: Hal,
-    _err: PhantomData<Error<SpiErr, PinErr, DelayErr>>,
-}
-
 /// S2lp configuration
 pub struct Config {
     /// Radio frequency for communication
     pub rf_freq_mhz: u16,
     // Clock / Crystal frequency
     pub clock_freq: ClockFreq,
+}
+
+/// S2lp device instance
+pub struct S2lp<Hal, SpiErr: Debug, PinErr: Debug, DelayErr: Debug> {
+    hal: Hal,
+    config: Config,
+    _err: PhantomData<Error<SpiErr, PinErr, DelayErr>>,
 }
 
 impl Default for Config {
@@ -92,8 +95,8 @@ where
     DelayErr: Debug,
 {
     /// Create a new device with the provided HAL and config
-    pub fn new(hal: Hal, _config: Config) -> Result<Self, Error<SpiErr, PinErr, DelayErr>> {
-        let mut s2lp = S2lp { hal, _err: PhantomData };
+    pub fn new(hal: Hal, config: Config) -> Result<Self, Error<SpiErr, PinErr, DelayErr>> {
+        let mut s2lp = S2lp { hal, config, _err: PhantomData };
 
         debug!("Resetting device");
 
@@ -109,9 +112,17 @@ where
         }
         debug!("Found device: {:?}", i);
 
+        s2lp.cmd_strobe(Command::Reset)?;
+        s2lp.hal.delay_ms(50);
+        s2lp.info()?;
+        debug!("Device reset ok");
         // TODO: actually configure the thing
 
         Ok(s2lp)
+    }
+
+    pub fn config(&self) -> &Config {
+        &self.config
     }
 
     /// Send a command strobe
@@ -238,7 +249,7 @@ where
 {
     type Error = Error<SpiErr, PinErr, DelayErr>;
 
-    fn set_power(&mut self, power: i8) -> Result<(), Self::Error> {
+    fn set_power(&mut self, _power: i8) -> Result<(), Self::Error> {
         todo!()
     }
 }

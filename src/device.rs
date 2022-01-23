@@ -5,7 +5,7 @@
 use core::convert::Infallible;
 
 use modular_bitfield::prelude::*;
-use num_enum::{IntoPrimitive, TryFromPrimitive, TryFromPrimitiveError};
+use num_enum::{IntoPrimitive, TryFromPrimitive /*, TryFromPrimitiveError */ };
 
 /// SPI command modes
 #[derive(Copy, Clone, Debug)]
