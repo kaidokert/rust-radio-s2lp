@@ -345,6 +345,19 @@ pub fn freq_from_synt( f_xo: u32, synt: u32, mid_band_selected: bool, divider_en
     freq as u32
 }
 
+pub fn datarate_from_me(f_dig: u32, mantissa: u16, exponent: u8) -> u32 {
+    // TODO: DATARATE_E==15 special formula
+    if exponent == 0 {
+        let dr = (f_dig as u64) * (mantissa as u64);
+        let shiftback = 33 - 1;
+        (dr >> shiftback) as u32
+    } else {
+        let dr = (f_dig as u64) * ((mantissa as u64) + 65536);
+        let shiftback = 33 - exponent;
+        (dr >> shiftback) as u32
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -371,4 +384,26 @@ mod tests {
         assert_eq!(433_000_001, freq_from_synt(fxo24, 0x9055556, true, true));
     }
 
+    #[test]
+    fn check_datarate() {
+        let fxo50 = 50_000_000;
+        let fxo24 = 24_000_000;
+        let fdig50 = fxo50 / 2;
+        let fdig24 = fxo24;
+        assert_eq!( 0, datarate_from_me(fdig50, 1, 0));
+        assert_eq!( 2, datarate_from_me(fdig50, 500, 0));
+        assert_eq!( 29, datarate_from_me(fdig50, 5000, 0));
+        assert_eq!( 27, datarate_from_me(fdig24, 5000, 0));
+        assert_eq!( 381, datarate_from_me(fdig50, 65535, 0));
+        assert_eq!( 366, datarate_from_me(fdig24, 65535, 0));
+
+        assert_eq!( 381, datarate_from_me(fdig50, 0, 1));
+        assert_eq!( 381, datarate_from_me(fdig50, 1, 1));
+        assert_eq!( 382, datarate_from_me(fdig50, 100, 1));
+        assert_eq!( 410, datarate_from_me(fdig50, 5000, 1));
+        assert_eq!( 394, datarate_from_me(fdig24, 5000, 1));
+        assert_eq!( 762, datarate_from_me(fdig50, 65535, 1));
+        assert_eq!( 6249952, datarate_from_me(fdig50, 65535, 14));
+        assert_eq!( 12499904, datarate_from_me(fdig50, 65535, 15));
+    }
 }
