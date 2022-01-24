@@ -587,7 +587,8 @@ impl radio::Register for Clockrec1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Pcktctrl6 {
-    pub raw: u8,
+    pub preamble_len_8_9: B2,
+    pub sync_len: B6,
 }
 
 impl radio::Register for Pcktctrl6 {
@@ -642,12 +643,12 @@ impl radio::Register for Pcktctrl3 {
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
-pub struct FixVarLen {
+pub struct Pcktctrl2 {
     pub raw: u8,
 }
 
-impl radio::Register for FixVarLen {
-    const ADDRESS: u8 = 0u8;
+impl radio::Register for Pcktctrl2 {
+    const ADDRESS: u8 = Registers::PCKTCTRL2 as u8;
     type Word = u8;
     type Error = Infallible;
 }
@@ -657,7 +658,16 @@ impl radio::Register for FixVarLen {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Pcktctrl1 {
-    pub raw: u8,
+    /// enable the FEC encoding in TX or the Viterbi decoding in RX
+    pub fec_en: bool,
+    /// TX: select secondary SYNC word, RX: enable the dual SYNC word detection mode
+    pub second_sync_sel: bool,
+    /// TX source data
+    pub tx_source: B2,
+    /// Enable whitening
+    pub whit_en: bool,
+    /// CRC mode
+    pub crc_mode: B3,
 }
 
 impl radio::Register for Pcktctrl1 {
@@ -1990,7 +2000,7 @@ pub struct Fifo {
 }
 
 impl radio::Register for Fifo {
-    const ADDRESS: u8 = 0u8;
+    const ADDRESS: u8 = Registers::FIFO as u8;
     type Word = u8;
     type Error = Infallible;
 }
