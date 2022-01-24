@@ -405,7 +405,14 @@ impl radio::Register for ChFlt {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Afc2 {
-    pub raw: u8,
+    #[skip]
+    __: B5,
+    /// Selects AFC mode
+    pub afc_mode: bool,
+    /// Enable AFC correction
+    pub afc_enabled: bool,
+    /// Enable the freeze AFC correction upon sync word detection.
+    pub afc_freeze_on_sync: bool,
 }
 
 impl radio::Register for Afc2 {
@@ -419,7 +426,8 @@ impl radio::Register for Afc2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Afc1 {
-    pub raw: u8,
+    /// The length of the AFC fast period.
+    pub afc_fast_period: B8,
 }
 
 impl radio::Register for Afc1 {
@@ -433,7 +441,10 @@ impl radio::Register for Afc1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Afc0 {
-    pub raw: u8,
+    /// The AFC loop gain in slow mode
+    pub afc_slow_gain: B4,
+    /// The AFC loop gain in fast mode
+    pub afc_fast_gain: B4
 }
 
 impl radio::Register for Afc0 {
@@ -447,7 +458,12 @@ impl radio::Register for Afc0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct RssiFlt {
-    pub raw: u8,
+    #[skip]
+    __: B2,
+    /// Carrier sense mode
+    pub cs_mode: B2,
+    /// Gain of the RSSI filter
+    pub rssi_flt: B4,
 }
 
 impl radio::Register for RssiFlt {
@@ -461,7 +477,8 @@ impl radio::Register for RssiFlt {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct RssiTh {
-    pub raw: u8,
+    /// Signal detect threshold in 1 dB steps
+    pub rssi_th: B8,
 }
 
 impl radio::Register for RssiTh {
@@ -475,7 +492,10 @@ impl radio::Register for RssiTh {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Agcctrl4 {
-    pub raw: u8,
+    /// Low threshold 1 for the AGC
+    pub low_threshold_1: B4,
+    /// Low threshold 0 for the AGC
+    pub low_threshold_0: B4,
 }
 
 impl radio::Register for Agcctrl4 {
@@ -489,7 +509,8 @@ impl radio::Register for Agcctrl4 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Agcctrl3 {
-    pub raw: u8,
+    /// Low threshold selection
+    pub low_threshold_sel: B8
 }
 
 impl radio::Register for Agcctrl3 {
@@ -503,7 +524,14 @@ impl radio::Register for Agcctrl3 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Agcctrl2 {
-    pub raw: u8,
+    /// AGC measurement time
+    pub meas_time: B4,
+    #[skip]
+    __: B1,
+    /// Enable the AGC algorithm to be frozen on SYNC
+    pub freeze_on_sync: bool,
+    #[skip]
+    __: B2,
 }
 
 impl radio::Register for Agcctrl2 {
@@ -517,7 +545,10 @@ impl radio::Register for Agcctrl2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Agcctrl1 {
-    pub raw: u8,
+    #[skip]
+    __: B4,
+    /// High threshold for the AGC
+    pub high_threshold: B4
 }
 
 impl radio::Register for Agcctrl1 {
@@ -531,7 +562,12 @@ impl radio::Register for Agcctrl1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Agcctrl0 {
-    pub raw: u8,
+    /// Hold time for after gain adjustment for the AGC.
+    pub hold_time: B6,
+    #[skip]
+    __: B4,
+    /// Enable AGC
+    pub agc_enable: bool,
 }
 
 impl radio::Register for Agcctrl0 {
