@@ -565,7 +565,7 @@ pub struct Agcctrl0 {
     /// Hold time for after gain adjustment for the AGC.
     pub hold_time: B6,
     #[skip]
-    __: B4,
+    __: B1,
     /// Enable AGC
     pub agc_enable: bool,
 }
@@ -1333,7 +1333,16 @@ impl radio::Register for PaPower1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower0 {
-    pub raw: u8,
+    /// Final level for power ramping or selected output power index
+    pub pa_level_max_idx: B3,
+    /// Set the step width (unit: 1/8 of bit period)
+    pub pa_ramp_step_len: B2, 
+    /// Enable the power ramping
+    pub pa_ramp_en: bool,
+    /// Configure the PA to send maximum output power. Power ramping is disable with this bit set
+    pub pa_maxdbm: bool,
+    /// enable the generation of the internal signal TX_DATA which is the input of the FIR
+    pub dig_smooth_en: bool,
 }
 
 impl radio::Register for PaPower0 {
