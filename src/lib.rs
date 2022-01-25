@@ -48,8 +48,8 @@ pub struct S2lp<Hal, SpiErr: Debug, PinErr: Debug, DelayErr: Debug> {
 
 impl Default for Config {
     fn default() -> Self {
-        Self { 
-            rf_freq_mhz: 433, 
+        Self {
+            rf_freq_mhz: 433,
             clock_freq: ClockFreq::Clock48MHz,
         }
     }
@@ -159,7 +159,7 @@ where
         self.write_register::<ChNum>(ChNum::new().with_ch_num(channel))?;
         Ok(())
     }
-    
+
     /// Fetch radio operating channel
     pub fn get_channel(&mut self) -> Result<u8, Error<SpiErr, PinErr, DelayErr>> {
         self.read_register::<ChNum>().map(|r| r.ch_num() )
@@ -186,7 +186,7 @@ where
     fn read_register<R: radio::Register<Word = u8>>(&mut self) -> Result<R, Self::Error> {
         let mut d = [0u8];
         self.hal.spi_read(
-            &[SpiCommand::Read as u8, R::ADDRESS], 
+            &[SpiCommand::Read as u8, R::ADDRESS],
             &mut d)?;
 
         R::try_from(d[0]).map_err(|_e| Error::UnexpectedValue(R::ADDRESS, d[0]))
@@ -358,6 +358,22 @@ pub fn datarate_from_me(f_dig: u32, mantissa: u16, exponent: u8) -> u32 {
     }
 }
 
+pub fn me_from_datarate(f_dig: u32, datarate: u32) -> (u16,u8) {
+    for exp in 0..16 {
+        let maxrate = datarate_from_me(f_dig, 0xFFFF, exp);
+        if datarate <= maxrate {
+            return (if exp == 0 {
+                let tgt=(datarate as u64)<<32;
+                (tgt/f_dig as u64) as u16
+            } else {
+                let tgt=(datarate as u64)<<(33-exp);
+                ((tgt/f_dig as u64)-65536) as u16
+            },exp)
+        }
+    }
+    (0,0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -405,5 +421,16 @@ mod tests {
         assert_eq!( 762, datarate_from_me(fdig50, 65535, 1));
         assert_eq!( 6249952, datarate_from_me(fdig50, 65535, 14));
         assert_eq!( 12499904, datarate_from_me(fdig50, 65535, 15));
+    }
+
+    #[test]
+    fn check_me() {
+        let fxo50 = 50_000_000;
+        let fxo24 = 24_000_000;
+        let fdig50 = fxo50 / 2;
+        let fdig24 = fxo24;
+        assert_eq!((4982,0), me_from_datarate(fdig50, 29));
+        assert_eq!((65455,0), me_from_datarate(fdig50, 381));
+        assert_eq!((65374,1), me_from_datarate(fdig50, 762));
     }
 }
