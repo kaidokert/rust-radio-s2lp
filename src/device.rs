@@ -581,7 +581,16 @@ impl radio::Register for Agcctrl0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct AntSelectConf {
-    pub raw: u8,
+    /// Set the measurement time
+    pub as_meas_time: B3,
+    /// enable the antenna switching
+    pub aes_enable:bool,
+    /// Do not fill the RX FIFO with data if the CS is above threshold
+    pub cs_blanking: bool,
+    /// ISI cancellation equalizer
+    pub equ_ctrl: B2,
+    #[skip]
+    __: B1,
 }
 
 impl radio::Register for AntSelectConf {
@@ -595,7 +604,12 @@ impl radio::Register for AntSelectConf {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Clockrec2 {
-    pub raw: u8,
+    /// Set the integral slow gain for symbol timing recovery
+    pub clk_rec_i_gain_slow: B4,
+    /// Select the symbol timing recovery algorithm
+    pub clk_rec_algo_sel: bool,
+    /// Clock recovery slow loop gain
+    pub clk_rec_p_gain_slow: B3
 }
 
 impl radio::Register for Clockrec2 {
@@ -609,7 +623,12 @@ impl radio::Register for Clockrec2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Clockrec1 {
-    pub raw: u8,
+    /// Set the integral fast gain for symbol timing recovery
+    pub clk_rec_i_gain_fast: B4,
+    /// Select the post filter length
+    pub pstflt_len: bool,
+    /// Clock recovery fast loop gain
+    pub clk_rec_p_gain_fast: B3,
 }
 
 impl radio::Register for Clockrec1 {
@@ -638,7 +657,8 @@ impl radio::Register for Pcktctrl6 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Pcktctrl5 {
-    pub raw: u8,
+    /// The LSB of the number of '01 or '10' of the preamble of the packet
+    pub preamble_len_7_0: B8,
 }
 
 impl radio::Register for Pcktctrl5 {
@@ -652,7 +672,14 @@ impl radio::Register for Pcktctrl5 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Pcktctrl4 {
-    pub raw: u8,
+    #[skip]
+    __: B3,
+    /// Include the ADDRESS field in the packet
+    pub address_len: bool,
+    #[skip]
+    __: B3,
+    /// The number of bytes used for the length field
+    pub len_wid: bool,
 }
 
 impl radio::Register for Pcktctrl4 {
@@ -666,7 +693,18 @@ impl radio::Register for Pcktctrl4 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Pcktctrl3 {
-    pub raw: u8,
+    /// Select the preamble pattern
+    pub preamble_sel: B2,
+    /// Select the transmission order between MSB and LSB
+    pub byte_swap: bool,
+    /// Select the symbol mapping for 4(G)FSK
+    pub fsk4_sym_swap: bool,
+    /// RX mode: packet / FIFO / GPIO
+    // todo
+    pub rx_mode: B2,
+    /// Format of packet
+    // todo
+    pub pckt_frmt: B2
 }
 
 impl radio::Register for Pcktctrl3 {
@@ -680,7 +718,20 @@ impl radio::Register for Pcktctrl3 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Pcktctrl2 {
-    pub raw: u8,
+    /// Packet length mode: fixed/variable
+    pub fix_var_len: bool,
+    /// enable the Manchester encoding/decoding
+    pub manchester_en: bool,
+    /// enable the 3-out-of-6 encoding/decoding
+    pub mbus_3of6_en: bool,
+    /// 802.15.4g interleaving, or UART start bit
+    pub int_en_4g_or_start_bit: bool,
+    /// 802.15.4g fec type, or UART stop bit
+    pub fec_type_4g_or_stop_bit: bool,
+    /// This is the FCS type in header field of 802.15.4g packet
+    pub fcs_type_4g: bool,
+    #[skip]
+    __: B2,
 }
 
 impl radio::Register for Pcktctrl2 {
@@ -717,7 +768,8 @@ impl radio::Register for Pcktctrl1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Pcktlen1 {
-    pub raw: u8,
+    /// MSB of length of packet in bytes.
+    pub pcktlen1: B8,
 }
 
 impl radio::Register for Pcktlen1 {
@@ -731,7 +783,8 @@ impl radio::Register for Pcktlen1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Pcktlen0 {
-    pub raw: u8,
+    /// LSB of length of packet in bytes
+    pub pcktlen0: B8,
 }
 
 impl radio::Register for Pcktlen0 {
@@ -745,7 +798,8 @@ impl radio::Register for Pcktlen0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Sync3 {
-    pub raw: u8,
+    /// SYNC word byte 3
+    pub sync3: B8,
 }
 
 impl radio::Register for Sync3 {
@@ -759,7 +813,8 @@ impl radio::Register for Sync3 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Sync2 {
-    pub raw: u8,
+    /// SYNC word byte 2
+    pub sync2: B8,
 }
 
 impl radio::Register for Sync2 {
@@ -773,7 +828,8 @@ impl radio::Register for Sync2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Sync1 {
-    pub raw: u8,
+    /// SYNC word byte 1
+    pub sync1: B8,
 }
 
 impl radio::Register for Sync1 {
@@ -787,7 +843,8 @@ impl radio::Register for Sync1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Sync0 {
-    pub raw: u8,
+    /// SYNC word byte 0
+    pub sync0: B8,
 }
 
 impl radio::Register for Sync0 {
@@ -801,7 +858,12 @@ impl radio::Register for Sync0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Qi {
-    pub raw: u8,
+    /// Enable the SQI check
+    pub sqi_en: bool,
+    /// PQI threshold
+    pub pqi_th: B4,
+    /// SQI threshold
+    pub sqi_th: B3,
 }
 
 impl radio::Register for Qi {
@@ -815,7 +877,8 @@ impl radio::Register for Qi {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PcktPstmbl {
-    pub raw: u8,
+    /// Set the packet postamble length
+    pub pckt_pstmbl: B8,
 }
 
 impl radio::Register for PcktPstmbl {
