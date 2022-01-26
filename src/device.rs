@@ -1,5 +1,5 @@
 //! S2-LP Device definitions
-//! 
+//!
 //! Copyright 2018 Ryan Kurte
 
 use core::convert::Infallible;
@@ -265,7 +265,7 @@ impl radio::Register for ChSpace {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct ChNum {
-    /// Channel number. This value is multiplied by the channel spacing and 
+    /// Channel number. This value is multiplied by the channel spacing and
     /// added to the synthesizer base frequency to generate the actual RF carrier frequency
     pub ch_num: u8,
 }
@@ -920,7 +920,16 @@ impl radio::Register for AutoPcktFlt {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Protocol0 {
-    pub raw: u8,
+    #[skip]
+    __: B1,
+    /// Enable the persistent RX mode
+    pub pers_rx: bool,
+    /// Enable the automatic acknowledgment if packet received request
+    pub auto_ack: bool,
+    /// field NO_ACK=1 on transmitted packet
+    pub nack_tx: bool,
+    /// Max. number of re-TX
+    pub nmax_retx: B4
 }
 
 impl radio::Register for Protocol0 {
@@ -934,7 +943,10 @@ impl radio::Register for Protocol0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct FifoConfig3 {
-    pub raw: u8,
+    /// Set the RX FIFO almost full threshold
+    pub rx_afthr: B7,
+    #[skip]
+    __: B1,
 }
 
 impl radio::Register for FifoConfig3 {
@@ -948,7 +960,10 @@ impl radio::Register for FifoConfig3 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct FifoConfig2 {
-    pub raw: u8,
+    /// Set the RX FIFO almost empty threshold
+    pub rx_aethr: B7,
+    #[skip]
+    __: B1,
 }
 
 impl radio::Register for FifoConfig2 {
@@ -962,7 +977,10 @@ impl radio::Register for FifoConfig2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct FifoConfig1 {
-    pub raw: u8,
+    /// Set the TX FIFO almost full threshold
+    pub tx_afthr: B7,
+    #[skip]
+    __: B1,
 }
 
 impl radio::Register for FifoConfig1 {
@@ -976,7 +994,10 @@ impl radio::Register for FifoConfig1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct FifoConfig0 {
-    pub raw: u8,
+    /// Set the TX FIFO almost empty threshold
+    pub tx_aethr: B7,
+    #[skip]
+    __: B1,
 }
 
 impl radio::Register for FifoConfig0 {
@@ -989,12 +1010,27 @@ impl radio::Register for FifoConfig0 {
 #[derive(Copy, Clone, PartialEq, Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
-pub struct DestVsSourceAddr {
-    pub raw: u8,
+pub struct PcktFltOptions {
+    /// packet discarded if CRC is not valid
+    pub crc_flt: bool,
+    ///RX packet accepted if its destination address matches with RX_SOURCE_ADDR register
+    pub dest_vs_source_addr:bool,
+    /// RX packet accepted if its destination address matches with MULTICAST_ADDR register
+    pub dest_vs_multicast_addr: bool,
+    /// RX packet accepted if its source field matches with BROADCAST_ADDR register
+    pub dest_vs_broadcast_addr: bool,
+    /// RX packet accepted if its source field matches with RX_SOURCE_ADDR register
+    pub source_addr_flt: bool,
+    #[skip]
+    __: B1,
+    /// Logical Boolean function applied to CS/SQI/PQI values
+    pub rx_timeout_and_or_sel: bool,
+    #[skip]
+    __: B1,
 }
 
-impl radio::Register for DestVsSourceAddr {
-    const ADDRESS: u8 = 0u8;
+impl radio::Register for PcktFltOptions {
+    const ADDRESS: u8 = Registers::PCKT_FLT_OPTIONS;
     type Word = u8;
     type Error = Infallible;
 }
@@ -1004,7 +1040,8 @@ impl radio::Register for DestVsSourceAddr {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PcktFltGoals4 {
-    pub raw: u8,
+    /// Mask register for source address filtering
+    pub rx_source_mask: B8,
 }
 
 impl radio::Register for PcktFltGoals4 {
@@ -1018,7 +1055,8 @@ impl radio::Register for PcktFltGoals4 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PcktFltGoals3 {
-    pub raw: u8,
+    /// RX packet source or TX packet destination field
+    pub rx_source_addr: B8,
 }
 
 impl radio::Register for PcktFltGoals3 {
@@ -1032,7 +1070,8 @@ impl radio::Register for PcktFltGoals3 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PcktFltGoals2 {
-    pub raw: u8,
+    /// Broadcast address
+    pub broadcast_addr: B8,
 }
 
 impl radio::Register for PcktFltGoals2 {
@@ -1046,7 +1085,8 @@ impl radio::Register for PcktFltGoals2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PcktFltGoals1 {
-    pub raw: u8,
+    /// Multicast address
+    pub multicast_addr: B8,
 }
 
 impl radio::Register for PcktFltGoals1 {
@@ -1060,7 +1100,8 @@ impl radio::Register for PcktFltGoals1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PcktFltGoals0 {
-    pub raw: u8,
+    /// Tx packet source or RX packet destination field
+    pub tx_source_addr: B8,
 }
 
 impl radio::Register for PcktFltGoals0 {
@@ -1074,7 +1115,8 @@ impl radio::Register for PcktFltGoals0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Timers5 {
-    pub raw: u8,
+    /// Counter for RX timer
+    pub rx_timer_counter: B8,
 }
 
 impl radio::Register for Timers5 {
@@ -1088,7 +1130,8 @@ impl radio::Register for Timers5 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Timers4 {
-    pub raw: u8,
+    /// Prescaler for RX timer.
+    pub rx_timer_presc: B8,
 }
 
 impl radio::Register for Timers4 {
@@ -1102,7 +1145,8 @@ impl radio::Register for Timers4 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Timers3 {
-    pub raw: u8,
+    /// Prescaler for wake up timer
+    pub ldc_timer_presc: B8,
 }
 
 impl radio::Register for Timers3 {
@@ -1116,7 +1160,8 @@ impl radio::Register for Timers3 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Timers2 {
-    pub raw: u8,
+    /// Counter for wake up timer
+    pub ldc_timer_cntr: B8,
 }
 
 impl radio::Register for Timers2 {
@@ -1130,7 +1175,8 @@ impl radio::Register for Timers2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Timers1 {
-    pub raw: u8,
+    /// Prescaler value for reload operation of wake up timer
+    pub ldc_reload_prsc: B8,
 }
 
 impl radio::Register for Timers1 {
@@ -1144,7 +1190,8 @@ impl radio::Register for Timers1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct Timers0 {
-    pub raw: u8,
+    /// Counter value for reload operation of wake up timer
+    pub ldc_reload_cntr: B8,
 }
 
 impl radio::Register for Timers0 {
@@ -1214,7 +1261,8 @@ impl radio::Register for CsmaConf0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct IrqMask3 {
-    pub raw: u8,
+    /// Enable the routing of the interrupt flag on the configured IRQ GPIO
+    pub int_mask_31_24: B8,
 }
 
 impl radio::Register for IrqMask3 {
@@ -1228,7 +1276,8 @@ impl radio::Register for IrqMask3 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct IrqMask2 {
-    pub raw: u8,
+    /// Enable the routing of the interrupt flag on the configured IRQ GPIO
+    pub int_mask_23_16: B8,
 }
 
 impl radio::Register for IrqMask2 {
@@ -1242,7 +1291,8 @@ impl radio::Register for IrqMask2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct IrqMask1 {
-    pub raw: u8,
+    /// Enable the routing of the interrupt flag on the configured IRQ GPIO
+    pub int_mask_15_8: B8,
 }
 
 impl radio::Register for IrqMask1 {
@@ -1256,7 +1306,8 @@ impl radio::Register for IrqMask1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct IrqMask0 {
-    pub raw: u8,
+    /// Enable the routing of the interrupt flag on the configured IRQ GPIO
+    pub int_mask_7_0: B8,
 }
 
 impl radio::Register for IrqMask0 {
@@ -1270,7 +1321,8 @@ impl radio::Register for IrqMask0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct FastRxTimer {
-    pub raw: u8,
+    /// Sniff timer configuration
+    pub rssi_settling_limit: u8,
 }
 
 impl radio::Register for FastRxTimer {
@@ -1284,7 +1336,8 @@ impl radio::Register for FastRxTimer {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower8 {
-    pub raw: u8,
+    /// Output power level for 8th slot
+    pub pa_level8: B8,
 }
 
 impl radio::Register for PaPower8 {
@@ -1298,7 +1351,8 @@ impl radio::Register for PaPower8 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower7 {
-    pub raw: u8,
+    /// Output power level for 7th slot
+    pub pa_level7: B8,
 }
 
 impl radio::Register for PaPower7 {
@@ -1312,7 +1366,8 @@ impl radio::Register for PaPower7 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower6 {
-    pub raw: u8,
+    /// Output power level for 6th slot
+    pub pa_level6: B8,
 }
 
 impl radio::Register for PaPower6 {
@@ -1326,7 +1381,8 @@ impl radio::Register for PaPower6 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower5 {
-    pub raw: u8,
+    /// Output power level for 5th slot
+    pub pa_level5: B8,
 }
 
 impl radio::Register for PaPower5 {
@@ -1340,7 +1396,8 @@ impl radio::Register for PaPower5 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower4 {
-    pub raw: u8,
+    /// Output power level for 4th slot
+    pub pa_level4: B8,
 }
 
 impl radio::Register for PaPower4 {
@@ -1354,7 +1411,8 @@ impl radio::Register for PaPower4 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower3 {
-    pub raw: u8,
+    /// Output power level for 3rd slot
+    pub pa_level3: B8,
 }
 
 impl radio::Register for PaPower3 {
@@ -1368,7 +1426,8 @@ impl radio::Register for PaPower3 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower2 {
-    pub raw: u8,
+    /// Output power level for 2nd slot
+    pub pa_level2: B8,
 }
 
 impl radio::Register for PaPower2 {
@@ -1382,7 +1441,8 @@ impl radio::Register for PaPower2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaPower1 {
-    pub raw: u8,
+    /// Output power level for 1st slot
+    pub pa_level1: B8,
 }
 
 impl radio::Register for PaPower1 {
@@ -1399,7 +1459,7 @@ pub struct PaPower0 {
     /// Final level for power ramping or selected output power index
     pub pa_level_max_idx: B3,
     /// Set the step width (unit: 1/8 of bit period)
-    pub pa_ramp_step_len: B2, 
+    pub pa_ramp_step_len: B2,
     /// Enable the power ramping
     pub pa_ramp_en: bool,
     /// Configure the PA to send maximum output power. Power ramping is disable with this bit set
@@ -1419,7 +1479,14 @@ impl radio::Register for PaPower0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaConfig1 {
-    pub raw: u8,
+    #[skip]
+    __: B1,
+    /// enable FIR
+    pub fir_en: bool,
+    /// FIR configuration
+    pub fir_cfg: B2,
+    #[skip]
+    __: B4,
 }
 
 impl radio::Register for PaConfig1 {
@@ -1433,7 +1500,14 @@ impl radio::Register for PaConfig1 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct PaConfig0 {
-    pub raw: u8,
+    /// PA Bessel filter bandwidth
+    pub pa_fc: B2,
+    /// During a TX operation, enables and starts the digital ASK calibrator.
+    pub safe_ask_cal: bool,
+    /// Enables the 'degeneration' mode that introduces a pre-distortion to linearize the power control curve
+    pub pa_degen_on: bool,
+    /// code threshold/clamp voltage trim config
+    pub pa_degen_trim: B4,
 }
 
 impl radio::Register for PaConfig0 {
@@ -1447,7 +1521,12 @@ impl radio::Register for PaConfig0 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct SynthConfig2 {
-    pub raw: u8,
+    #[skip]
+    __: B2,
+    /// Enables increased DN current pulses to improve linearization of CP/PFD
+    pub pll_pdf_split_en: bool,
+    #[skip]
+    __: B5,
 }
 
 impl radio::Register for SynthConfig2 {
@@ -1461,7 +1540,14 @@ impl radio::Register for SynthConfig2 {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[repr(u8)]
 pub struct VcoConfig {
-    pub raw: u8,
+    #[skip]
+    __: B4,
+    /// VCO amplitude calibration will be skippe
+    pub vco_calfreq_ext_sel: bool,
+    /// VCO frequency calibration will be skipped
+    pub vco_calamp_ext_sel: bool,
+    #[skip]
+    __: B2,
 }
 
 impl radio::Register for VcoConfig {
